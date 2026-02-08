@@ -189,7 +189,9 @@ const Admin = () => {
 
   const handleCreateCategory = async (e) => {
     e.preventDefault()
-    await supabase.from('categories').insert({ name: newCategoryName, description: newCategoryDesc })
+    if (!newCategoryName.trim()) { showMsg('Inserisci un nome per la categoria'); return }
+    const { error } = await supabase.from('categories').insert({ name: newCategoryName.trim(), description: newCategoryDesc.trim() || null })
+    if (error) { showMsg('Errore: ' + error.message); console.error('Errore creazione categoria:', error); return }
     setNewCategoryName(''); setNewCategoryDesc(''); fetchCategories(); showMsg('Categoria creata!')
   }
 
