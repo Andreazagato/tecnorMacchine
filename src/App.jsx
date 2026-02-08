@@ -9,21 +9,37 @@ import Admin from './pages/Admin'
 import Profile from './pages/Profile'
 import Training from './pages/Training'
 import VideoPlayer from './pages/VideoPlayer'
+import { useState, useEffect } from 'react'
 
 const ProtectedRoute = ({ children }) => {
   const { profile, loading } = useAuth()
+  const [timedOut, setTimedOut] = useState(false)
 
-  if (loading) return (
+  // Safety timeout: se il loading dura più di 8 secondi, redirect al login
+  useEffect(() => {
+    if (!loading) {
+      setTimedOut(false)
+      return
+    }
+    const timer = setTimeout(() => setTimedOut(true), 8000)
+    return () => clearTimeout(timer)
+  }, [loading])
+
+  if (loading && !timedOut) return (
     <div style={{
       minHeight: '100vh',
       display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'var(--gradient-bg)'
+      background: 'var(--gradient-bg)',
+      gap: '1rem'
     }}>
       <div className="loading-spinner" />
+      <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Caricamento...</p>
     </div>
   )
+
   if (!profile) return <Navigate to="/login" />
 
   return children
